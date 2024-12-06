@@ -11,4 +11,4 @@ gunicorn==20.1.0
 git+https://github.com/PrithivirajDamodaran/Gramformer.git
 
 # SpaCy model installation (add to the build command)
-spacy download en_core_web_sm
+
