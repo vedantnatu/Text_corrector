@@ -1,4 +1,3 @@
-# Dependencies
 Flask==2.3.2
 Flask-Cors==3.0.10
 PyPDF2==3.0.1
@@ -11,23 +10,5 @@ gunicorn==20.1.0
 # Gramformer installation from GitHub
 git+https://github.com/PrithivirajDamodaran/Gramformer.git
 
-spacy==3.5.3
-
-
-
-
-
-# Install the en_core_web_sm model after setting up the environment:
-# python -m spacy download en_core_web_sm
-
-
-
-# If you're deploying on a server without GPU, ensure CPU-compatible Torch is installed:
-# pip install torch --index-url https://download.pytorch.org/whl/cpu
-
-
-# pip install -r requirements.txt
-
-
-# Your project uses packages like gramformer and torch, which are known to work well with Python 3.9.
-
+# SpaCy model installation (add to the build command)
+spacy download en_core_web_sm
