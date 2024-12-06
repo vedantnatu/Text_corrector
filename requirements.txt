@@ -9,6 +9,3 @@ gunicorn==20.1.0
 
 # Gramformer installation from GitHub
 git+https://github.com/PrithivirajDamodaran/Gramformer.git
-
-# SpaCy model installation (add to the build command)
-
