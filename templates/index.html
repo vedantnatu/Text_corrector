@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Correction Service</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Text Correction Service</h1>
+
+        <div id="input-section">
+            <!-- Text Input Form -->
+            <form id="text-form" method="POST">
+                <h2>Enter Text:</h2>
+                <textarea name="text" rows="10" placeholder="Enter your text here..."></textarea>
+                <br>
+                <input type="submit" value="Correct Text">
+            </form>
+
+            <!-- PDF Upload Form -->
+            <form id="pdf-form" method="POST" enctype="multipart/form-data">
+                <h2>Upload PDF:</h2>
+                <input type="file" name="pdf" accept=".pdf">
+                <br>
+                <input type="submit" value="Upload and Correct">
+            </form>
+        </div>
+
+        <!-- Corrected Text -->
+        <h2>Corrected Text:</h2>
+        <pre id="result"></pre>
+
+        <!-- Correction Analytics -->
+        <h2>Correction Analytics:</h2>
+        <canvas id="correctionsChart"></canvas>
+
+        <!-- Download Report -->
+        <h2>Report:</h2>
+        <button id="download-report">Download Correction Report</button>
+
+        <!-- Feedback Section -->
+        <div id="feedback" style="color: red; font-weight: bold;"></div>
+    </div>
+
+    <script>
+        // Chart.js for Analytics
+        const correctionsChart = new Chart(document.getElementById('correctionsChart').getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: ['Grammar Errors', 'Spelling Errors', 'Punctuation Errors'],
+                datasets: [{
+                    label: 'Corrections Made',
+                    data: [0, 0, 0], // Placeholder data
+                    backgroundColor: ['#007bff', '#74ebd5', '#9face6'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        async function handleSubmit(form) {
+            const formData = new FormData(form);
+            const response = await fetch('/correct_text', { method: 'POST', body: formData });
+
+            const feedback = document.getElementById('feedback');
+            if (response.ok) {
+                const result = await response.json();
+
+                // Update corrected text
+                document.getElementById('result').textContent = result.corrected_text;
+
+                // Update chart with stats
+                correctionsChart.data.datasets[0].data = [
+                    result.stats.grammar,
+                    result.stats.spelling,
+                    result.stats.punctuation
+                ];
+                correctionsChart.update();
+
+                feedback.style.color = 'green';
+                feedback.textContent = 'Text corrected successfully!';
+            } else {
+                const error = await response.json();
+                feedback.style.color = 'red';
+                feedback.textContent = error.corrected_text || 'An error occurred while correcting the text.';
+            }
+        }
+
+        document.getElementById('text-form').onsubmit = function (e) {
+            e.preventDefault();
+            handleSubmit(this);
+        };
+
+        document.getElementById('pdf-form').onsubmit = function (e) {
+            e.preventDefault();
+            handleSubmit(this);
+        };
+
+        // Handle Download Report Button
+        document.getElementById('download-report').onclick = async function () {
+            const response = await fetch('/download_report');
+            if (response.ok) {
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'correction_report.txt';
+                a.click();
+                window.URL.revokeObjectURL(url);
+            } else {
+                const feedback = document.getElementById('feedback');
+                feedback.style.color = 'red';
+                feedback.textContent = 'No report available to download.';
+            }
+        };
+    </script>
+</body>
+</html>
