@@ -4,6 +4,7 @@ import PyPDF2
 from gramformer import Gramformer
 import torch
 import spacy
+from spacy.cli import download
 from spelling_corrector import correct_spelling
 import re
 import matplotlib.pyplot as plt
@@ -15,7 +16,13 @@ CORS(app)
 
 # Initialize models
 gf = Gramformer(models=1, use_gpu=torch.cuda.is_available())
-nlp = spacy.load("en_core_web_sm")
+
+# Try to load the spaCy model, if not available, download it
+try:
+    nlp = spacy.load("en_core_web_sm")
+except OSError:
+    download("en_core_web_sm")
+    nlp = spacy.load("en_core_web_sm")
 
 # Directory for generated files
 GENERATED_FILES_DIR = "generated_reports"
