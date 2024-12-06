@@ -12,7 +12,7 @@ gunicorn==20.1.0
 git+https://github.com/PrithivirajDamodaran/Gramformer.git
 
 spacy==3.5.3
-en_core_web_sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.5.0/en_core_web_sm-3.5.0.tar.gz
+
 torch==2.0.1+cu118  # Example for CUDA 11.8
 
 
