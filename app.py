@@ -8,6 +8,7 @@ from spelling_corrector import correct_spelling
 import re
 import matplotlib.pyplot as plt
 import os
+import time
 
 app = Flask(__name__)
 CORS(app)
@@ -19,6 +20,13 @@ nlp = spacy.load("en_core_web_sm")
 # Directory for generated files
 GENERATED_FILES_DIR = "generated_reports"
 os.makedirs(GENERATED_FILES_DIR, exist_ok=True)
+
+def cleanup_generated_files():
+    """Remove old files from the generated files directory."""
+    for file in os.listdir(GENERATED_FILES_DIR):
+        file_path = os.path.join(GENERATED_FILES_DIR, file)
+        if os.path.isfile(file_path):
+            os.remove(file_path)
 
 def fix_contractions(text):
     contractions = {
@@ -42,6 +50,8 @@ def home():
 
 @app.route('/correct_text', methods=['POST'])
 def correct_text():
+    cleanup_generated_files()
+
     text = request.form.get('text', '')
     pdf = request.files.get('pdf')
     grammar_count, spelling_count, punctuation_count = 0, 0, 0
@@ -85,11 +95,12 @@ def correct_text():
     punctuation_count = corrected_text.count('.') - original_text.count('.')
 
     # Generate analytics chart
-    chart_path = os.path.join(GENERATED_FILES_DIR, 'analytics_chart.png')
+    timestamp = int(time.time())
+    chart_path = os.path.join(GENERATED_FILES_DIR, f'analytics_chart_{timestamp}.png')
     generate_chart(grammar_count, spelling_count, punctuation_count, chart_path)
 
     # Save report
-    report_path = os.path.join(GENERATED_FILES_DIR, 'correction_report.txt')
+    report_path = os.path.join(GENERATED_FILES_DIR, f'correction_report_{timestamp}.txt')
     with open(report_path, 'w') as report_file:
         report_file.write("Correction Report\n")
         report_file.write("=================\n\n")
@@ -124,7 +135,8 @@ def generate_chart(grammar_count, spelling_count, punctuation_count, file_path):
 
 @app.route('/download_report', methods=['GET'])
 def download_report():
-    report_path = os.path.join(GENERATED_FILES_DIR, 'correction_report.txt')
+    report_name = request.args.get('report')
+    report_path = os.path.join(GENERATED_FILES_DIR, report_name)
     if os.path.exists(report_path):
         return send_file(report_path, as_attachment=True)
     return jsonify({'error': 'Report not found'}), 404
